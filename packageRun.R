@@ -19,7 +19,7 @@ p = list()
 p$nrowgrids = 10
 p$ncolgrids = 10
 p$ngrids = p$nrowgrids * p$ncolgrids
-p$initlambda = 0.1
+p$initlambda = 0.2
 p$initD = 3
 p$shrinkage = 0.993
 p$currentZoI = 15
@@ -29,16 +29,22 @@ p$ntraps = nrow(p$Trap)
 p$saturationThreshold = 5
 p$howClose = 0.5
 p$dStep = 5
-p$lengthBased = FALSE
+p$lengthBased = TRUE
+p$lobsterSizeFile <- 'LobsterSizeFreqs.csv' 
 p$lobLengthThreshold = 115
 p$trapSaturation = TRUE
 p$q0 = 0.5
 p$qmin = 0
 p$realizations = 20 #number of iterations/simulations
 p$tSteps = 5       #timesteps per iteration
-p$losbterSizeFile <- 'LobsterSizeFreqs.csv'
-#p$losbterSizeFile <- '' in case of lengthbased= FALSE
-
+p$sexBased <- TRUE
+# The following lines creates a sex distribution
+p$lobsterSexDist <- list(labels = c('M','F','MM','BF'), #male, female, mature male, berried female
+                         prob1 = c(0.55,0.35,0.05,0.05), #their prob in population
+                         prob2 = c(0.5,0.50,0,0), # prob of small males and females that are under lobsterMatThreshold
+                         lobsterMatThreshold = 100  # The average size of mature lobsters
+                         )
+# p$lobsterSexDist <- ''  # in case of p$sexBased = FALSE
 
 TrialSim <- SimulateLobsterMovement(p)
 Results  <- GetSimOutput(TrialSim)
