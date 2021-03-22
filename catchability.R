@@ -9,19 +9,47 @@
 #' @param lengthBased is a logical parameter(TRUE/FALSE) which determines if length of catch needs too be considered 
 #' @param lobLengthThreshold is a length threshold (i.e. CL in centimeters) beyond which there is no chance of catching another lobster
 #' @param lobSize is a size frequency dataset which is set to NA by default 
+#' @param lobSex is the sex of the lobster 
 #' @return Returns the probability of entry to trap
 #' @export
-catchability <- function(q0, qmin, saturationThreshold, Ct, lengthBased, lobLengthThreshold, lobSize = NA){
+catchability <- function(q0, qmin, saturationThreshold, Ct, lengthBased, lobLengthThreshold, lobSize = NA, sexBased, lobSex){
   
-  if( lengthBased == FALSE ){
+  #len = F sex = F
+  #len = F sex = T (need to write)
+  #len = T sex = F (the same structure as 27 onwards)
+  #len = T sex = T (the same structure as 27 onwards)
+  
+  if( (lengthBased == FALSE) & (sexBased == FALSE) ){
     r  <- (log(0.01) - log(q0 - qmin))/(-saturationThreshold)
     q  <- ( (q0 - qmin) / exp(r*Ct) ) + qmin
     return(q)
-  }else{
+  }
+  
+  if( (lengthBased == FALSE) & (sexBased == TRUE) ){
+    
+    temp2 <- unlist( strsplit( lobSex, split = '-' ) )
+    temp2 <- temp2[2:length(temp2)]
+    
+    if( any(temp2 %in% 'BF') ){
+      q = 0
+      return(q)
+    }else{
+      r = (log(0.01) - log(q0 - qmin))/(-saturationThreshold)
+      q = (q0-qmin) / exp(r*Ct) + qmin
+      return(q)
+    }
+    
+    
+    
+  }
+
+  if( (lengthBased == TRUE) & (sexBased == FALSE) ){
+    
     #When lengthBased=TRUE and caught lobster is larger than 115-> q=0
     temp <- unlist( strsplit( lobSize, split = '-' ) )
     temp <- temp[2:length(temp)]
     temp <- as.numeric(temp)
+    
     if( any(temp > lobLengthThreshold, na.rm = TRUE) ){
       q = 0
       return(q)
@@ -31,5 +59,29 @@ catchability <- function(q0, qmin, saturationThreshold, Ct, lengthBased, lobLeng
       return(q)
     }
     
+    
   }
+  
+  if( (lengthBased == TRUE) & (sexBased == TRUE) ){
+
+    #When lengthBased=TRUE and caught lobster is larger than 115-> q=0
+    temp <- unlist( strsplit( lobSize, split = '-' ) )
+    temp <- temp[2:length(temp)]
+    temp <- as.numeric(temp)
+    
+    temp2 <- unlist( strsplit( lobSex, split = '-' ) )
+    temp2 <- temp2[2:length(temp2)]
+
+    
+    if( (any(temp > lobLengthThreshold, na.rm = TRUE) | ( any(temp2 %in% 'BF') ) ) ){
+      q = 0
+      return(q)
+    }else{
+      r = (log(0.01) - log(q0 - qmin))/(-saturationThreshold)
+      q = (q0-qmin) / exp(r*Ct) + qmin
+      return(q)
+    }
+    
+  }
+
 }
